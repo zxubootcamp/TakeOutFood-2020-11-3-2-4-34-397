@@ -61,9 +61,12 @@
                             Item item = items.Where(c => c.Id == itemId).FirstOrDefault();
                             stringBuilder.Append(item.Name + ", ");
                             saving += item.Price * 0.5;
-                            string names = stringBuilder.ToString().TrimEnd(new char[] { ' ', ',' });
-                            resultBuilderDiscount.Append($"{salesPromotion.DisplayName} ({names}), saving {saving} yuan\n");
                         }
+                    }
+                    if (stringBuilder.Length > 0)
+                    {
+                        string names = stringBuilder.ToString().TrimEnd(new char[] { ' ', ',' });
+                        resultBuilderDiscount.Append($"{salesPromotion.DisplayName} ({names}), saving {saving} yuan\n");
                     }
                     totalSaving += saving;
                 }
