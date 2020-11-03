@@ -1,0 +1,10 @@
+################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+.vs
+/TakeOutFood/bin
+/TakeOutFood/obj
+/TakeOutFoodTest/bin
+/TakeOutFoodTest/obj
+.idea
