@@ -18,10 +18,7 @@
 
         public string BestCharge(List<string> inputs)
         {
-            StringBuilder resultBuilderOrigin = new StringBuilder("============= Order details =============\n");
-            double originPrice = 0;
             SortedDictionary<string, int> inputItems = new SortedDictionary<string, int>();
-            //TODO: write code here
             foreach (var item in inputs)
             {
                 string[] tokenList = item.Split(' ');
@@ -36,6 +33,9 @@
                 }
             }
 
+            StringBuilder resultBuilderOrigin = new StringBuilder();
+            resultBuilderOrigin.Append("============= Order details =============\n");
+            double originPrice = 0;
             List<Item> items = itemRepository.FindAll();
             foreach (var itemId in inputItems.Keys)
             {
@@ -46,42 +46,42 @@
             }
 
             List<SalesPromotion> salesPromotions = salesPromotionRepository.FindAll();
-            StringBuilder resultBuilderDiscount = new StringBuilder();
-            double totalSaving = 0;
+            StringBuilder resultBuilderSaving = new StringBuilder();
+            double bestSaving = 0;
             foreach (var salesPromotion in salesPromotions)
             {
+                double saving = 0;
+                StringBuilder currentPromotion = new StringBuilder();
                 if (salesPromotion.Type == "50%_DISCOUNT_ON_SPECIFIED_ITEMS")
                 {
-                    double saving = 0;
-                    StringBuilder stringBuilder = new StringBuilder();
                     foreach (var itemId in salesPromotion.RelatedItems)
                     {
                         if (inputItems.ContainsKey(itemId))
                         {
                             Item item = items.Where(c => c.Id == itemId).FirstOrDefault();
-                            stringBuilder.Append(item.Name + ", ");
+                            currentPromotion.Append(item.Name + ", ");
                             saving += item.Price * 0.5;
                         }
                     }
-                    if (stringBuilder.Length > 0)
-                    {
-                        string names = stringBuilder.ToString().TrimEnd(new char[] { ' ', ',' });
-                        resultBuilderDiscount.Append($"{salesPromotion.DisplayName} ({names}), saving {saving} yuan\n");
-                    }
-                    totalSaving += saving;
+                }
+                if (currentPromotion.Length > 0 && saving > bestSaving)
+                {
+                    string names = currentPromotion.ToString().TrimEnd(new char[] { ' ', ',' });
+                    resultBuilderSaving.Clear();
+                    resultBuilderSaving.Append($"{salesPromotion.DisplayName} ({names}), saving {saving} yuan\n");
+                    bestSaving = saving;
                 }
             }
-            if (resultBuilderDiscount.Length > 0)
+
+            if (resultBuilderSaving.Length > 0)
             {
-                resultBuilderDiscount.Insert(0, "Promotion used:\n");
-                resultBuilderDiscount.Insert(0, "-----------------------------------\n");
+                resultBuilderSaving.Insert(0, "Promotion used:\n");
+                resultBuilderSaving.Insert(0, "-----------------------------------\n");
             }
-            resultBuilderDiscount.Append("-----------------------------------\n");
-            resultBuilderDiscount.Append($"Total：{originPrice - totalSaving} yuan\n");
-            resultBuilderDiscount.Append("===================================");
-            string result = resultBuilderOrigin.ToString() + resultBuilderDiscount.ToString();
-            Console.WriteLine(result);
-            return result;
+            resultBuilderSaving.Append("-----------------------------------\n");
+            resultBuilderSaving.Append($"Total：{originPrice - bestSaving} yuan\n");
+            resultBuilderSaving.Append("===================================");
+            return resultBuilderOrigin.ToString() + resultBuilderSaving.ToString();
         }
     }
 }
